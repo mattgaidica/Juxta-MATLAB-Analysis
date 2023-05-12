@@ -1,0 +1,99 @@
+function reviewData(logsFile,metaFile,doSave)
+
+Meta = readtable(metaFile);
+Logs = readtable(logsFile,'Delimiter',',');
+
+if ~isempty(Logs)
+    [t_logs,ids_logs] = convertJxTime(Logs,"");
+    [uniqueTheirMac,~,y] = unique(Logs.their_mac(ids_logs));
+    occurrences = histcounts(categorical(Logs.their_mac(ids_logs)),categorical(uniqueTheirMac));
+    [~, sortedIdx] = sort(occurrences, 'descend');
+    sortedUniqueTheirMac = uniqueTheirMac(sortedIdx);
+    unique_colors = parula(numel(uniqueTheirMac));
+    y_labels = cellstr(sortedUniqueTheirMac);
+    circle_sizes = rescale(-Logs.rssi(ids_logs).^2,1,100);
+
+    % Group the table rows by their_mac and assign a color to each group
+    color_map = lines(numel(uniqueTheirMac));
+    colors = color_map(y,:);
+end
+
+t_all = [];
+if height(Meta) > 10
+    [t_vbatt,ids_vbatt] = convertJxTime(Meta,"vbatt");
+    [t_deg_c,ids_deg_c] = convertJxTime(Meta,"deg_c");
+    [t_sync,ids_sync] = convertJxTime(Meta,"tsync");
+    
+    [t_xl,ids_xl] = convertJxTime(Meta,"xl");
+    
+    t_all = convertJxTime(Meta,"");
+    minTime = min(t_all);
+    maxTime = max(t_all);
+    hourlyTimestamps = minTime:hours(1):maxTime;
+    xlCount = zeros(size(hourlyTimestamps));
+    for i = 1:numel(hourlyTimestamps)-1
+        xlCount(i) = 100 * sum(find(ids_xl) & t_xl >= hourlyTimestamps(i) & t_xl < hourlyTimestamps(i+1)) / 60;
+    end
+end
+
+lw = 3;
+fs = 14;
+close all;
+rows = 2;
+cols = 2;
+ff(1400,600);
+
+if ~isempty(t_all)
+    [~,logsName] = fileparts(logsFile);
+    subplot(rows,cols,1);
+    plot(t_vbatt,Meta.data_value(ids_vbatt),'color','k','linewidth',lw);
+    title(sprintf("%s\n%1.1f hours (%1.2f days) runtime",...
+        logsName,hours(max(t_vbatt) - min(t_vbatt)),days(max(t_vbatt) - min(t_vbatt))),...
+        'interpreter','none');
+    ylabel('Vbatt (V)');
+    set(gca,'ycolor','k');
+    hold on;
+    lineColors = lines(5);
+    for i = 1:numel(t_sync)
+        xline(t_sync(i),'color',lineColors(5,:),'LineWidth',5);
+        if i == 1
+            text(t_sync(i),mean(ylim)," \leftarrow Time Synced",'fontsize',fs,'color',lineColors(5,:));
+        end
+    end
+    xlim([min(t_all),max(t_all)]);
+    ylim([2.8 4.1]);
+    grid on;
+    
+    subplot(rows,cols,3);
+    bar(hourlyTimestamps,xlCount,'facecolor','k','facealpha',0.2);
+    xlim([min(hourlyTimestamps),max(hourlyTimestamps)]);
+    ylabel('XL (%)');
+    set(gca,'ycolor','k');
+    
+    yyaxis right;
+    plot(t_deg_c,Meta.data_value(ids_deg_c),'color','r','linewidth',lw);
+    xlim([min(t_all),max(t_all)]);
+    ylabel('Temp (C)');
+    set(gca,'ycolor','r');
+    grid on;
+    hold on;
+    title("XL & Temp")
+end
+
+if ~isempty(t_logs)
+    subplot(rows,cols,[2,4]);
+    scatter(t_logs,y,circle_sizes,unique_colors(y,:),'filled');
+    set(gca,'YTick',1:numel(uniqueTheirMac),'YTickLabel',y_labels);
+    if isempty(t_all)
+        xlim([t_logs(1),t_logs(end)]);
+    else
+        xlim([min(t_all),max(t_all)]);
+    end
+    title("Their MAC");
+    grid on;
+end
+
+if doSave && ~isempty(t_all) && ~isempty(Logs)
+    saveas(gcf,sprintf("%s.png",logsFile));
+    close(gcf);
+end
