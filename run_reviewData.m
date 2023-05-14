@@ -1,4 +1,5 @@
 dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger';
+dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Tests';
 
 txtFiles = dir2(dataPath,'*.txt');
 % remove hidden files
@@ -12,7 +13,7 @@ for ii = 1:size(txtFiles)
         fnames{jj} = txtFiles(ii).name(1:end-4); %#ok<SAGROW>, rm .txt
     end
 end
-%%
+
 clc
 usedIds = [];
 for ii = 1:numel(fnames)

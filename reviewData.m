@@ -11,7 +11,7 @@ if ~isempty(Logs)
     sortedUniqueTheirMac = uniqueTheirMac(sortedIdx);
     unique_colors = parula(numel(uniqueTheirMac));
     y_labels = cellstr(sortedUniqueTheirMac);
-    circle_sizes = rescale(-Logs.rssi(ids_logs).^2,1,100);
+    circle_sizes = rescale(-Logs.rssi(ids_logs).^2,20,100);
 
     % Group the table rows by their_mac and assign a color to each group
     color_map = lines(numel(uniqueTheirMac));
@@ -19,7 +19,7 @@ if ~isempty(Logs)
 end
 
 t_all = [];
-if height(Meta) > 10
+if ~isempty(Meta)
     [t_vbatt,ids_vbatt] = convertJxTime(Meta,"vbatt");
     [t_deg_c,ids_deg_c] = convertJxTime(Meta,"deg_c");
     [t_sync,ids_sync] = convertJxTime(Meta,"tsync");
@@ -27,12 +27,19 @@ if height(Meta) > 10
     [t_xl,ids_xl] = convertJxTime(Meta,"xl");
     
     t_all = convertJxTime(Meta,"");
+    if ~isempty(t_logs)
+        t_all = unique(sort([t_all;t_logs])); % debug this case
+    end
     minTime = min(t_all);
     maxTime = max(t_all);
-    hourlyTimestamps = minTime:hours(1):maxTime;
-    xlCount = zeros(size(hourlyTimestamps));
-    for i = 1:numel(hourlyTimestamps)-1
-        xlCount(i) = 100 * sum(find(ids_xl) & t_xl >= hourlyTimestamps(i) & t_xl < hourlyTimestamps(i+1)) / 60;
+    if maxTime - minTime > hours(1)
+        xlTimestamps = minTime:hours(1):maxTime;
+    else
+        xlTimestamps = minTime:minutes(1):maxTime;
+    end
+    xlCount = zeros(size(xlTimestamps));
+    for i = 1:numel(xlTimestamps)-1
+        xlCount(i) = 100 * sum(find(ids_xl) & t_xl >= xlTimestamps(i) & t_xl < xlTimestamps(i+1)) / 60;
     end
 end
 
@@ -63,10 +70,10 @@ if ~isempty(t_all)
     xlim([min(t_all),max(t_all)]);
     ylim([2.8 4.1]);
     grid on;
-    
+
     subplot(rows,cols,3);
-    bar(hourlyTimestamps,xlCount,'facecolor','k','facealpha',0.2);
-    xlim([min(hourlyTimestamps),max(hourlyTimestamps)]);
+    bar(xlTimestamps,xlCount,'facecolor','k','facealpha',0.2);
+    xlim([min(xlTimestamps),max(xlTimestamps)]);
     ylabel('XL (%)');
     set(gca,'ycolor','k');
     
