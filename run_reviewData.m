@@ -1,12 +1,10 @@
 dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger';
 savePath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Analysis';
-% dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Tests';
 
 txtFiles = dir2(dataPath,'*.txt');
 % remove hidden files
 fnames = {};
 jj = 0;
-rmIds = [];
 for ii = 1:size(txtFiles)
     [~,name,~] = fileparts(txtFiles(ii).name);
     if name(1) ~= '.'
@@ -24,7 +22,7 @@ for ii = 1:numel(fnames)
     ids = find(contains(fnames,fileBase));
     if numel(ids) > 1 && ~any(ismember(ids,usedIds)) % has both entries, skip ones that are done
         usedIds = [usedIds;ids]; %#ok<AGROW> 
-        if contains(fnames{ii},'meta')
+        if contains(fnames{ii},'_meta')
             meta_id = ii;
             logs_id = ids(ids ~= ii);
         else
