@@ -1,4 +1,4 @@
-function reviewData(logsFile,metaFile,doSave)
+function [Logs,Meta] = reviewData(logsFile,metaFile)
 
 Meta = readtable(metaFile);
 Logs = readtable(logsFile,'Delimiter',',');
@@ -98,9 +98,4 @@ if ~isempty(t_logs)
     end
     title("Their MAC");
     grid on;
-end
-
-if doSave && ~isempty(t_all) && ~isempty(Logs)
-    saveas(gcf,sprintf("%s.png",logsFile));
-    close(gcf);
 end

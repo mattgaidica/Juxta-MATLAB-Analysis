@@ -1,5 +1,6 @@
 dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger';
-dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Tests';
+savePath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Analysis';
+% dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Tests';
 
 txtFiles = dir2(dataPath,'*.txt');
 % remove hidden files
@@ -10,10 +11,11 @@ for ii = 1:size(txtFiles)
     [~,name,~] = fileparts(txtFiles(ii).name);
     if name(1) ~= '.'
         jj = jj + 1;
-        fnames{jj} = txtFiles(ii).name(1:end-4); %#ok<SAGROW>, rm .txt
+        fnames{jj,1} = txtFiles(ii).name(1:end-4); %#ok<SAGROW>, rm .txt
     end
 end
-
+%
+doSave = 1;
 clc
 usedIds = [];
 for ii = 1:numel(fnames)
@@ -21,7 +23,7 @@ for ii = 1:numel(fnames)
     fileBase = strjoin(fileBase(1:4),'_');
     ids = find(contains(fnames,fileBase));
     if numel(ids) > 1 && ~any(ismember(ids,usedIds)) % has both entries, skip ones that are done
-        usedIds = [usedIds ids]; %#ok<AGROW> 
+        usedIds = [usedIds;ids]; %#ok<AGROW> 
         if contains(fnames{ii},'meta')
             meta_id = ii;
             logs_id = ids(ids ~= ii);
@@ -31,7 +33,17 @@ for ii = 1:numel(fnames)
         end
         logsFile = fullfile(dataPath,[fnames{logs_id},'.txt']);
         metaFile = fullfile(dataPath,[fnames{meta_id},'.txt']);
-        reviewData(logsFile,metaFile,true);
-        fprintf("%s\n%s\n\n",logsFile,metaFile);
+        saveFile = fullfile(savePath,[fnames{logs_id},'.png']);
+        fprintf("%s\n%s\n",logsFile,metaFile);
+        if isfile(saveFile)
+            fprintf("--exists, skipping\n\n");
+        else
+            [Logs,Meta] = reviewData(logsFile,metaFile);
+            if doSave && ~isempty(Logs)
+                saveas(gcf,saveFile);
+                close(gcf);
+                fprintf("--saved!\n");
+            end
+        end
     end
 end
