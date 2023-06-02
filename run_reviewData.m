@@ -1,4 +1,8 @@
+cd /Users/mattgaidica/Documents/MATLAB/misc/Juxta
+
 dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger';
+dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_BaseStation';
+
 savePath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Analysis';
 
 txtFiles = dir2(dataPath,'*.txt');

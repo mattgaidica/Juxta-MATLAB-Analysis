@@ -43,7 +43,7 @@ if ~isempty(Meta)
     end
 end
 
-lw = 3;
+lw = 1;
 fs = 14;
 close all;
 rows = 2;
@@ -72,7 +72,7 @@ if ~isempty(t_all)
     grid on;
 
     subplot(rows,cols,3);
-    bar(xlTimestamps,xlCount,'facecolor','k','facealpha',0.2);
+    bar(xlTimestamps,xlCount,'facecolor','k','facealpha',0.5);
     xlim([min(xlTimestamps),max(xlTimestamps)]);
     ylabel('XL (%)');
     set(gca,'ycolor','k');
