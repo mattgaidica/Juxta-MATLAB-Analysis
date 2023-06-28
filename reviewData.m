@@ -3,6 +3,7 @@ function [Logs,Meta] = reviewData(logsFile,metaFile)
 Meta = readtable(metaFile);
 Logs = readtable(logsFile,'Delimiter',',');
 
+t_logs = [];
 if ~isempty(Logs)
     [t_logs,ids_logs] = convertJxTime(Logs,"");
     [uniqueTheirMac,~,y] = unique(Logs.their_mac(ids_logs));
