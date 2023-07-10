@@ -1,5 +1,5 @@
-logsFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0608_0628_C01E8A6_2DA5.txt';
-metaFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0608_0628_C01E8A6_2DA5_meta.txt';
+logsFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0628_0708_C01EAB4_2DAE.txt';
+metaFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0628_0708_C01EAB4_2DAE_meta.txt';
 
 Meta = readtable(metaFile);
 Logs = readtable(logsFile,'Delimiter',',');
