@@ -1,7 +1,13 @@
 function [Logs,Meta] = reviewData(logsFile,metaFile)
 
-Meta = readtable(metaFile);
-Logs = readtable(logsFile,'Delimiter',',');
+Logs = [];
+if ~isempty(logsFile)
+    Logs = readtable(logsFile,'Delimiter',',');
+end
+Meta = [];
+if ~isempty(metaFile)
+    Meta = readtable(metaFile);
+end
 
 t_logs = [];
 if ~isempty(Logs)
@@ -49,17 +55,21 @@ fs = 14;
 close all;
 rows = 2;
 cols = 2;
-ff(1400,600);
+figure('position',[0,0,1400,600]);
 
 if ~isempty(t_all)
-    [~,logsName] = fileparts(logsFile);
+    if ~isempty(logsFile)
+        [~,logsName] = fileparts(logsFile);
+    else
+        logsName = '';
+    end
     subplot(rows,cols,1);
-    plot(t_vbatt,Meta.data_value(ids_vbatt),'color','k','linewidth',lw);
+    plot(t_vbatt,Meta.data_value(ids_vbatt),'color','w','linewidth',lw);
     title(sprintf("%s\n%1.1f hours (%1.2f days) runtime",...
         logsName,hours(max(t_vbatt) - min(t_vbatt)),days(max(t_vbatt) - min(t_vbatt))),...
         'interpreter','none');
     ylabel('Vbatt (V)');
-    set(gca,'ycolor','k');
+    set(gca,'ycolor','w');
     hold on;
     lineColors = lines(5);
     for i = 1:numel(t_sync)
@@ -73,10 +83,10 @@ if ~isempty(t_all)
     grid on;
 
     subplot(rows,cols,3);
-    bar(xlTimestamps,xlCount,'facecolor','k','facealpha',0.5);
+    bar(xlTimestamps,xlCount,'facecolor','w','facealpha',0.5);
     xlim([min(xlTimestamps),max(xlTimestamps)]);
     ylabel('XL (%)');
-    set(gca,'ycolor','k');
+    set(gca,'ycolor','w');
     
     yyaxis right;
     plot(t_deg_c,Meta.data_value(ids_deg_c),'color','r','linewidth',lw);
