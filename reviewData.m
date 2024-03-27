@@ -1,4 +1,4 @@
-function [Logs,Meta] = reviewData(logsFile,metaFile)
+function [Logs,Meta] = reviewData(logsFile,metaFile,~)
 
 Logs = [];
 if ~isempty(logsFile)
@@ -7,6 +7,10 @@ end
 Meta = [];
 if ~isempty(metaFile)
     Meta = readtable(metaFile);
+end
+
+if nargin == 3
+    return;
 end
 
 t_logs = [];
@@ -52,7 +56,7 @@ end
 
 lw = 1;
 fs = 14;
-close all;
+% close all;
 rows = 2;
 cols = 2;
 figure('position',[0,0,1400,600]);

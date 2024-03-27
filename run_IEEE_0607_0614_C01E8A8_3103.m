@@ -1,5 +1,12 @@
-logsFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0607_0614_C01E8A8_3103.txt';
-metaFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0607_0614_C01E8A8_3103_meta.txt';
+dataPath = '/Users/mattgaidica/Documents/MATLAB/Juxta/Vole 2023 - Mengxiao/Data_Juxta_Trim';
+logsFile = fullfile(dataPath,'0505_0514_88BD95B_2DA8_trim_TrappedDead.txt');
+metaFile = fullfile(dataPath,'0505_0514_88BD95B_2DA8_meta_trim_TrappedDead.txt');
+
+% logsFile = fullfile(dataPath,'0505_0514_C01E8C8_2DD4_trim_TrappedDead.txt');
+% metaFile = fullfile(dataPath,'0505_0514_C01E8C8_2DD4_meta_trim_TrappedDead.txt');
+
+% logsFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0607_0614_C01E8A8_3103.txt';
+% metaFile = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger/0607_0614_C01E8A8_3103_meta.txt';
 
 Meta = readtable(metaFile);
 Logs = readtable(logsFile,'Delimiter',',');
@@ -92,4 +99,4 @@ text(x,2,"-91dB  ",'FontSize',fs,'fontname','monospaced','HorizontalAlignment','
 
 x = datetime(2023,06,10,1,30,02,'timezone','local');
 text(x,3,"-85dB  ",'FontSize',fs,'fontname','monospaced','HorizontalAlignment','right','color',unique_colors(3,:));
-saveas(gcf,'JuxtaIEEE_DataFigure.png');
+% saveas(gcf,'JuxtaIEEE_DataFigure.png');

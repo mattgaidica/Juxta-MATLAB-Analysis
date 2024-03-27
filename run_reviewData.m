@@ -1,9 +1,9 @@
-cd /Users/mattgaidica/Documents/MATLAB/misc/Juxta
+cd /Users/mattgaidica/Documents/MATLAB/Juxta
 
-dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Biologger';
+dataPath = '/Users/mattgaidica/Documents/MATLAB/Juxta/Vole 2023 - Mengxiao/Data_Juxta_Trim';
 % dataPath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_BaseStation';
 
-savePath = '/Users/mattgaidica/Dropbox (University of Michigan)/VoleFieldwork2023/Data/Data_Analysis';
+savePath = '/Users/mattgaidica/Documents/MATLAB/Juxta/Vole 2023 - Mengxiao/Data_Juxta_Trim/Analysis';
 
 txtFiles = dir2(dataPath,'*.txt');
 % remove hidden files
