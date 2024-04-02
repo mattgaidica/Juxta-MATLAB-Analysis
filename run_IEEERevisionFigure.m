@@ -1,4 +1,5 @@
-dataPath = '/Users/mattgaidica/Documents/MATLAB/Juxta/Vole 2023 - Mengxiao/Data_Juxta_Trim';
+% dataPath = '/Users/mattgaidica/Documents/MATLAB/Juxta/Vole 2023 - Mengxiao/Data_Juxta_Trim';
+dataPath = '/Users/mattgaidica/Documents/MATLAB/Juxta/Vole 2023 - Mengxiao/Data_Juxta_Trim_manualFix';
 
 txtFiles = dir2(dataPath,'*.txt');
 % remove hidden files
@@ -50,19 +51,32 @@ fragment = '2D:B5';
 % fragment = '2D:D4';
 % fragment = '2D:F5';
 
+unique_macs = unique(compiled_data.my_mac);
+% remove dead animal collars
+matching_macs = unique_macs(endsWith(unique_macs, "2D:D4"));
+unique_macs(ismember(unique_macs,matching_macs{1})) = [];
+matching_macs = unique_macs(endsWith(unique_macs, "2D:A8"));
+unique_macs(ismember(unique_macs,matching_macs{1})) = [];
+matching_macs = unique_macs(endsWith(unique_macs, "2D:AC"));
+unique_macs(ismember(unique_macs,matching_macs{1})) = [];
+
+filtered_data = compiled_data;
+filtered_data = filtered_data(ismember(filtered_data.their_mac, unique_macs), :);
+filtered_data = filtered_data(ismember(filtered_data.my_mac, unique_macs), :);
+
 % Get all unique MAC addresses
-all_macs = unique([compiled_data.my_mac; compiled_data.their_mac]);
+% unique_macs = unique([compiled_data.my_mac; compiled_data.their_mac]);
 
 % Create a map to associate each MAC address with a unique index
-mac_to_index = containers.Map(all_macs, 1:length(all_macs));
+mac_to_index = containers.Map(unique_macs, 1:length(unique_macs));
 
 % Initialize the adjacency matrix
-adj_matrix = zeros(length(all_macs));
+adj_matrix = zeros(length(unique_macs));
 
 % Populate the adjacency matrix
-for i = 1:height(compiled_data)
-    row = mac_to_index(compiled_data.my_mac{i});
-    col = mac_to_index(compiled_data.their_mac{i});
+for i = 1:height(filtered_data)
+    row = mac_to_index(filtered_data.my_mac{i});
+    col = mac_to_index(filtered_data.their_mac{i});
     adj_matrix(row, col) = adj_matrix(row, col) + 1;  % Increment the count for this relationship
 end
 
@@ -71,21 +85,33 @@ adj_matrix = adj_matrix + adj_matrix';
 
 close all
 % circularGraph(adj_matrix,'Label',all_macs);
-myColorMap = parula(length(all_macs));
+myColorMap = parula(length(unique_macs));
 
 % Find all MAC addresses that end with the specified fragment
-matching_macs = all_macs(endsWith(all_macs, fragment));
+matching_macs = unique_macs(endsWith(unique_macs, fragment));
 match_index = mac_to_index(matching_macs{1});
-LineMask = zeros(1,length(all_macs));
+LineMask = zeros(1,length(unique_macs));
 LineMask(match_index) = 1;
-circularGraph(adj_matrix,'Colormap',myColorMap,'Label',compose('V%02d',1:length(all_macs)),'LineMask',LineMask);
+circularGraph(adj_matrix,'Colormap',myColorMap,'Label',compose('V%02d',1:length(unique_macs)),'LineMask',LineMask);
 print(gcf, 'resubmit_adjacencyMatrix.eps', '-depsc', '-painters');
 
+%%
+% Create a histogram of interaction counts with a custom bar width
+figure;
+histogram(interaction_counts, 'BinWidth', 10);
+xlabel('Number of Interactions');
+ylabel('Frequency');
+title('Histogram of Interaction Magnitudes');
 
 %%
 
 [Logs,Meta] = reviewData(fullfile(dataPath,logsFile),fullfile(dataPath,metaFile),false);
-disp(match_index);
+% Get the unique MAC addresses from filtered_data
+unique_macs_filtered = unique([filtered_data.my_mac; filtered_data.their_mac]);
+
+% Filter Logs where my_mac and their_mac exist in unique_macs_filtered
+Logs = Logs(ismember(Logs.my_mac, unique_macs_filtered) & ismember(Logs.their_mac, unique_macs_filtered), :);
+
 
 t_logs = [];
 if ~isempty(Logs)
@@ -126,7 +152,7 @@ end
 lw = 3;
 fs = 12;
 close all;
-rows = 8;
+rows = 7;
 cols = 1;
 ff(450,600);
 nSmooth = 1;
@@ -136,7 +162,7 @@ subplot(rows,cols,1:3);
 bar(xlTimestamps(1:end-1),xlCount,'facecolor','k','facealpha',0.75,'EdgeColor','w');
 % plot(xlTimestamps(1:end-1),smoothdata(xlCount,'gaussian',nSmooth),'k-','linewidth',lw);
 xlim([min(xlTimestamps),max(xlTimestamps)]);
-ylabel('XL (norm)');
+ylabel('Movement (norm)');
 set(gca,'ycolor','k');
 % ylim([-2 2]);
 % ylim([0 1]);
@@ -150,15 +176,19 @@ ylabel('Temp (C)');
 set(gca,'ycolor','r');
 grid on;
 hold on;
-title(sprintf("XL & Temp for V%02d",match_index));
-xlim([t_logs(1),t_logs(capLogsAt)]);
+title(sprintf("Movement & Collar Temp for V%02d",match_index));
+% xlim([t_logs(1),t_logs(capLogsAt)]);
 set(gca,'fontsize',fs);
 % set(gca, 'FontName', 'Monospaced');
 
 % remake labels
 MAC_idx = [];
 for ii = 1:length(sortedUniqueTheirMac)
-    MAC_idx(ii) = mac_to_index(sortedUniqueTheirMac{ii});
+    try
+        MAC_idx = [MAC_idx;mac_to_index(sortedUniqueTheirMac{ii})];
+    catch
+        fprintf("Not found: %s\n", sortedUniqueTheirMac{ii});
+    end
 end
 y_labels = compose("V%02d",MAC_idx);
 [~,k] = sort(MAC_idx,'descend');
@@ -171,10 +201,10 @@ new_y_values = y_unique(k);
 % Remap the original y-values to the new y-values
 y_remapped = new_y_values(idx);
 
-subplot(rows,cols,5:8);
+subplot(rows,cols,5:rows);
 scatter(t_logs, y_remapped, circle_sizes, unique_colors(y_remapped), 'filled');
 set(gca,'YTick',1:numel(uniqueTheirMac),'YTickLabel',y_labels(k));
-xlim([t_logs(1),t_logs(capLogsAt)]);
+% xlim([t_logs(1),t_logs(capLogsAt)]);
 title("Other Vole's RSSI");
 grid on;
 set(gca,'fontsize',fs);
